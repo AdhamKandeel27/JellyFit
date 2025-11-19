@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  jellyfit-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: jellyfit-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
