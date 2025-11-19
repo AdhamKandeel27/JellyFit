@@ -1,0 +1,8 @@
+{
+  "name": "JellyFit",
+  "description": "A premium fitness tracker for discerning athletes.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
