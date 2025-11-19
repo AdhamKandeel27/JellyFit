@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, TrendingUp, Clock, Sparkles, ArrowRight } from 'lucide-react';
 import { Session } from '../types';
@@ -9,9 +10,10 @@ import { Button } from '../components/Button';
 interface DashboardViewProps {
   sessions: Session[];
   onCreateSession: () => void;
+  userSport: string | null;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreateSession }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreateSession, userSport }) => {
   const [insights, setInsights] = useState<string | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
 
@@ -40,7 +42,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
       <div className="px-6 pt-8 pb-2 flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-bold text-navy-900 font-serif tracking-tight">JellyFit</h1>
-          <p className="text-slate-500 font-medium mt-1">Elevate your performance.</p>
+          <p className="text-slate-500 font-medium mt-1">
+            {userSport ? `${userSport} Training` : 'Elevate your performance.'}
+          </p>
         </div>
         <div className="bg-gold-100 text-gold-700 border border-gold-200 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">
           Premium
@@ -49,9 +53,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 gap-4 px-6">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
           <div className="flex items-center justify-between mb-3">
-            <div className="bg-slate-50 p-2 rounded-lg text-navy-700">
+            <div className="bg-slate-50 p-2 rounded-lg text-navy-700 group-hover:bg-navy-50 group-hover:text-navy-900 transition-colors">
                 <Activity size={18} />
             </div>
             <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+12%</span>
@@ -59,9 +63,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
           <div className="text-3xl font-bold text-slate-900 font-serif">{sessionsThisWeek}</div>
           <div className="text-xs text-slate-400 font-medium uppercase tracking-wide mt-1">Sessions This Week</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
           <div className="flex items-center justify-between mb-3">
-            <div className="bg-slate-50 p-2 rounded-lg text-gold-600">
+            <div className="bg-slate-50 p-2 rounded-lg text-gold-600 group-hover:bg-gold-50 group-hover:text-gold-700 transition-colors">
                 <Clock size={18} />
             </div>
           </div>
@@ -75,7 +79,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
         <Button 
             onClick={onCreateSession} 
             size="lg" 
-            className="w-full shadow-lg shadow-navy-900/20 bg-navy-900 border border-navy-800 flex justify-between items-center group"
+            className="w-full shadow-lg shadow-navy-900/20 bg-navy-900 border border-navy-800 flex justify-between items-center group hover:bg-navy-800"
         >
           <span>Start Training</span>
           <span className="bg-white/20 rounded-full p-1 group-hover:bg-white/30 transition-colors">

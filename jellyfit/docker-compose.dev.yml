@@ -13,7 +13,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY}
     stdin_open: true
     tty: true
     restart: unless-stopped
