@@ -1,68 +1,20 @@
-# 🏋️‍♂️ JellyFit  
-A modern, mobile-first workout tracking application designed specifically for padel athletes.  
-JellyFit makes it easy to log gym sessions, track exercises, attach technique videos, monitor weekly progress, and even run circuit training timers — all inside a clean and fast UI.
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
----
+# Run and deploy your AI Studio app
 
-## 🚀 Features
+This contains everything you need to run your app locally.
 
-### 📝 Session Tracking
-- Create structured training sessions  
-- Add exercises with:
-  - Sets
-  - Reps  
-  - Time-based duration (seconds/minutes)
-  - Optional image or short video (for technique reference)
-- Auto-track total session time
+View your app in AI Studio: https://ai.studio/apps/drive/1CZNvjCI9T5cYOo3VEPiJrBfUBN7VRnbV
 
-### 📹 Exercise Media Attachments
-- Upload images or 5–15 second videos
-- Use as reference for future workouts
-- Stored securely in cloud storage (Supabase recommended)
+## Run Locally
 
-### 📊 Weekly Dashboard
-- Total sessions per week  
-- Total time trained  
-- Session type distribution  
-- Most common exercises  
-- Weekly calendar view
+**Prerequisites:**  Node.js
 
-### 🔁 Circuit Training Mode
-- Build custom circuits  
-- Track rounds, work time, and rest intervals  
-- Stopwatch + lap timing  
-- Circuit summary screen
 
-### ⏱️ Built-in Timers
-- Timed exercises (planks, mobility holds, cardio intervals)
-- Large easy-to-read timer UI
-
-### 🏷️ Predefined Session Types (Padel-Focused)
-- Strength Training  
-- Mobility & Flexibility  
-- Performance & Power  
-- Coordination & Agility  
-- Circuit Conditioning  
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React**
-- **TypeScript**
-- **TailwindCSS**
-- (Optional) Zustand or Redux Toolkit for state
-
-### Backend (Recommended)
-- **Supabase**
-  - Authentication  
-  - PostgreSQL database  
-  - Storage for images/videos  
-  - Auto-generated APIs
-
-Alternative backends:
-- Firebase  
-- Node.js + Express + Prisma + S3/R2
-
----
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

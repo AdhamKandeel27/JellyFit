@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Check, X, Camera, Video, Timer as TimerIcon, Trash2, Save, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { Session, ExerciseData, SetData, Template, SessionType } from '../types';
 import { Button } from '../components/Button';
-import { v4 as uuidv4 } from 'uuid';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -24,13 +24,27 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
   
   // Initialize from template
   useEffect(() => {
-    const initialExercises: ExerciseData[] = template.defaultExercises.map(name => ({
-      id: generateId(),
-      name,
-      sets: [createSet()],
-      mediaType: undefined,
-      isTimed: false
-    }));
+    // If template has detailed exercises (from AI Plan), use them. Otherwise default mapping.
+    let initialExercises: ExerciseData[] = [];
+
+    if (template.detailedExercises && template.detailedExercises.length > 0) {
+      initialExercises = template.detailedExercises.map(ex => ({
+        id: generateId(),
+        name: ex.name,
+        sets: Array(ex.sets).fill(null).map(() => createSet()),
+        isTimed: false,
+        targetReps: ex.reps,
+        notes: ex.notes
+      }));
+    } else {
+      initialExercises = template.defaultExercises.map(name => ({
+        id: generateId(),
+        name,
+        sets: [createSet()],
+        mediaType: undefined,
+        isTimed: false
+      }));
+    }
     setExercises(initialExercises);
   }, [template]);
 
@@ -48,7 +62,7 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
 
   const createSet = (): SetData => ({
     id: generateId(),
-    reps: 10,
+    reps: 0, // Default to 0 so user types
     weight: null,
     time: null,
     completed: false
@@ -187,6 +201,12 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
             <div className="bg-slate-50/50 p-4 border-b border-slate-100 flex justify-between items-start">
               <div className="flex-1">
                 <h3 className="font-serif font-bold text-slate-800 text-xl">{ex.name}</h3>
+                {ex.targetReps && (
+                  <p className="text-xs text-navy-600 font-medium mt-0.5">Target: {ex.sets.length} x {ex.targetReps}</p>
+                )}
+                {ex.notes && (
+                  <p className="text-xs text-slate-500 italic mt-1">Note: {ex.notes}</p>
+                )}
                 <div className="flex gap-3 mt-2">
                    <button 
                     onClick={() => toggleTimedExercise(ex.id)}
@@ -245,6 +265,7 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
                              type="number" 
                              className="w-full text-center bg-white border border-slate-200 rounded shadow-sm py-2 text-slate-900 font-medium focus:ring-1 focus:ring-navy-500 focus:border-navy-500 outline-none transition-all"
                              value={set.time || ''}
+                             placeholder="-"
                              onChange={(e) => updateSet(ex.id, set.id, 'time', Number(e.target.value))}
                            />
                         ) : (
@@ -252,6 +273,7 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
                             type="number" 
                             className="w-full text-center bg-white border border-slate-200 rounded shadow-sm py-2 text-slate-900 font-medium focus:ring-1 focus:ring-navy-500 focus:border-navy-500 outline-none transition-all"
                             value={set.weight || ''}
+                            placeholder="-"
                             onChange={(e) => updateSet(ex.id, set.id, 'weight', Number(e.target.value))}
                           />
                         )}
@@ -263,6 +285,7 @@ export const ActiveSessionView: React.FC<ActiveSessionViewProps> = ({ template, 
                         type="number" 
                         className="w-full text-center bg-white border border-slate-200 rounded shadow-sm py-2 text-slate-900 font-medium focus:ring-1 focus:ring-navy-500 focus:border-navy-500 outline-none transition-all"
                         value={set.reps || ''}
+                        placeholder={ex.targetReps || "-"}
                         onChange={(e) => updateSet(ex.id, set.id, 'reps', Number(e.target.value))}
                       />
                     </div>

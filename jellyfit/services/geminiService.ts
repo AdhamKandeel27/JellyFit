@@ -1,9 +1,9 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Session, Template, SessionType } from "../types";
+import { Session, Template, SessionType, UserProfile, WeeklyPlan } from "../types";
 
 const getClient = () => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
     console.warn("API Key not found in environment variables.");
     return null;
@@ -112,5 +112,116 @@ export const generateSportRoutines = async (sport: string): Promise<Template[]> 
   } catch (error) {
     console.error("Error generating routines:", error);
     return fallback;
+  }
+};
+
+export const generateWeeklyPlan = async (profile: UserProfile): Promise<WeeklyPlan | null> => {
+  const ai = getClient();
+  if (!ai) return null;
+
+  const prompt = `
+    Create a 7-day progressive training plan for a client with the following profile:
+    - Sport: ${profile.sport}
+    - Experience: ${profile.experienceLevel}
+    - Age: ${profile.age}
+    - Goals: ${profile.goals}
+    - Injuries/Constraints: ${profile.injuries || "None"}
+    - Training Frequency: ${profile.frequency} days per week
+
+    Requirements:
+    1. Distribute training days appropriately based on frequency.
+    2. Include rest days.
+    3. For training days, provide specific exercises with sets/reps.
+    4. Focus on sport-specific needs.
+    
+    Return strictly JSON conforming to the schema.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            weekStartDate: { type: Type.STRING, description: "ISO date string for start of this plan" },
+            days: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  day: { type: Type.STRING, description: "e.g. Monday" },
+                  focus: { type: Type.STRING },
+                  type: { type: Type.STRING, enum: [SessionType.STRENGTH, SessionType.MOBILITY, SessionType.PERFORMANCE, SessionType.CIRCUIT, SessionType.CUSTOM] },
+                  isRestDay: { type: Type.BOOLEAN },
+                  exercises: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        name: { type: Type.STRING },
+                        sets: { type: Type.INTEGER },
+                        reps: { type: Type.STRING },
+                        rest: { type: Type.STRING },
+                        notes: { type: Type.STRING }
+                      },
+                      required: ["name", "sets", "reps"]
+                    }
+                  }
+                },
+                required: ["day", "focus", "type", "isRestDay", "exercises"]
+              }
+            }
+          },
+          required: ["days"]
+        }
+      }
+    });
+
+    const rawData = JSON.parse(response.text || "{}");
+    
+    return {
+      id: `plan-${Date.now()}`,
+      weekStartDate: rawData.weekStartDate || new Date().toISOString(),
+      generatedAt: new Date().toISOString(),
+      days: rawData.days.map((d: any) => ({...d, completed: false}))
+    };
+
+  } catch (error) {
+    console.error("Error generating weekly plan:", error);
+    return null;
+  }
+};
+
+export const chatWithCoach = async (profile: UserProfile, message: string, history: {role: string, parts: {text: string}[]}[]): Promise<string> => {
+  const ai = getClient();
+  if (!ai) return "I'm having trouble connecting. Please check your internet or API key.";
+
+  const systemInstruction = `
+    You are "JellyCoach", an expert performance coach specializing in ${profile.sport}.
+    
+    Client Profile:
+    - Level: ${profile.experienceLevel}
+    - Goals: ${profile.goals}
+    - Issues: ${profile.injuries || "None"}
+    
+    Tone: Encouraging, concise, technical but accessible.
+    Answer the user's question specifically related to their sport and data.
+  `;
+
+  try {
+    const chat = ai.chats.create({
+      model: 'gemini-2.5-flash',
+      config: { systemInstruction },
+      history: history
+    });
+
+    const result = await chat.sendMessage({ message });
+    return result.text || "I didn't catch that. Could you rephrase?";
+  } catch (error) {
+    console.error("Chat error:", error);
+    return "I'm taking a quick break (connection error). Try again in a moment.";
   }
 };

@@ -1,42 +1,43 @@
-import { SessionType, Template } from './types';
+
+import { Template, SessionType } from './types';
+
+export const MOCK_HISTORY_DATA = [
+  { name: 'Mon', duration: 45 },
+  { name: 'Tue', duration: 60 },
+  { name: 'Wed', duration: 0 },
+  { name: 'Thu', duration: 55 },
+  { name: 'Fri', duration: 90 },
+  { name: 'Sat', duration: 120 },
+  { name: 'Sun', duration: 30 },
+];
 
 export const PADEL_TEMPLATES: Template[] = [
   {
-    id: 't1',
-    name: 'Explosive Strength',
+    id: 'strength-1',
+    name: 'Padel Power',
     type: SessionType.STRENGTH,
-    description: 'Focus on squats, lunges, and upper body power for smash defense.',
-    defaultExercises: ['Goblet Squats', 'Romanian Deadlifts', 'Push Press', 'Rotational Cable Woodchops']
+    description: 'Explosive strength for smashes and fast court movement.',
+    defaultExercises: ['Squat Jumps', 'Medicine Ball Slams', 'Lateral Lunges', 'Push Press']
   },
   {
-    id: 't2',
-    name: 'Court Mobility',
+    id: 'mobility-1',
+    name: 'Court Flow',
     type: SessionType.MOBILITY,
-    description: 'Open up hips and thoracic spine for better court coverage.',
-    defaultExercises: ['90/90 Hip Switch', 'Thoracic Rotation', 'Cat-Cow', 'World\'s Greatest Stretch']
+    description: 'Hip and shoulder mobility essential for rotation.',
+    defaultExercises: ['90/90 Hip Switch', 'Thoracic Rotations', 'Cat-Cow', 'Wrist Mobility']
   },
   {
-    id: 't3',
-    name: 'Agility & Speed',
-    type: SessionType.AGILITY,
-    description: 'Ladder drills and reaction time improvements.',
-    defaultExercises: ['Ladder Icky Shuffle', 'Cone Zig-Zag', 'Split Step Reaction', 'Lateral Bounds']
+    id: 'perf-1',
+    name: 'Match Ready',
+    type: SessionType.PERFORMANCE,
+    description: 'High intensity intervals mimicking rally length.',
+    defaultExercises: ['Shuttle Runs', 'Shadow Swings', 'Ladder Drills', 'Box Jumps']
   },
   {
-    id: 't4',
-    name: 'Padel Circuit',
+    id: 'circuit-1',
+    name: 'Full Body Circuit',
     type: SessionType.CIRCUIT,
-    description: 'High intensity intervals to mimic long rallies.',
-    defaultExercises: ['Burpees', 'Box Jumps', 'Medicine Ball Slams', 'Plank Hold']
+    description: 'Endurance and conditioning circuit.',
+    defaultExercises: ['Burpees', 'Kettlebell Swings', 'Plank', 'Mountain Climbers']
   }
-];
-
-export const MOCK_HISTORY_DATA = [
-  { name: 'Mon', duration: 45, sessions: 1 },
-  { name: 'Tue', duration: 0, sessions: 0 },
-  { name: 'Wed', duration: 60, sessions: 1 },
-  { name: 'Thu', duration: 30, sessions: 1 },
-  { name: 'Fri', duration: 0, sessions: 0 },
-  { name: 'Sat', duration: 90, sessions: 2 },
-  { name: 'Sun', duration: 0, sessions: 0 },
 ];

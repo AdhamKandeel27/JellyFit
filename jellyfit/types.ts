@@ -1,17 +1,26 @@
+
+export type ViewState = 'auth' | 'dashboard' | 'tracker' | 'new-session' | 'active-session' | 'history' | 'session-details' | 'profile-wizard' | 'chat' | 'profile';
+
 export enum SessionType {
-  STRENGTH = 'Strength Training',
-  MOBILITY = 'Mobility / Flexibility',
-  PERFORMANCE = 'Performance & Power',
-  AGILITY = 'Coordination & Agility',
-  CIRCUIT = 'Circuit Conditioning',
-  CUSTOM = 'Custom Session'
+  STRENGTH = 'Strength',
+  MOBILITY = 'Mobility',
+  PERFORMANCE = 'Performance',
+  CIRCUIT = 'Circuit',
+  CUSTOM = 'Custom'
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
 }
 
 export interface SetData {
   id: string;
-  reps: number | null;
-  weight: number | null; // in kg
-  time: number | null; // in seconds
+  reps: number;
+  weight: number | null;
+  time: number | null;
   completed: boolean;
 }
 
@@ -19,20 +28,59 @@ export interface ExerciseData {
   id: string;
   name: string;
   sets: SetData[];
-  mediaUrl?: string; // Blob URL for MVP
+  isTimed: boolean;
+  mediaUrl?: string;
   mediaType?: 'image' | 'video';
+  targetReps?: string; // From AI plan
+  targetSets?: number; // From AI plan
   notes?: string;
-  isTimed?: boolean;
 }
 
 export interface Session {
   id: string;
-  date: string; // ISO string
-  type: SessionType;
+  date: string;
+  type: SessionType | string;
   durationMinutes: number;
   exercises: ExerciseData[];
   isCircuit?: boolean;
   notes?: string;
+}
+
+// AI Coaching Types
+
+export interface UserProfile {
+  name: string;
+  age: number;
+  sport: string;
+  experienceLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  goals: string;
+  injuries: string;
+  frequency: number; // days per week
+  aiCoaching: boolean;
+}
+
+export interface ProgramExercise {
+  name: string;
+  sets: number;
+  reps: string;
+  rest?: string;
+  notes?: string;
+}
+
+export interface DailyPlan {
+  day: string; // e.g. "Monday"
+  focus: string; // e.g. "Leg Power"
+  type: SessionType;
+  exercises: ProgramExercise[];
+  isRestDay: boolean;
+  completed: boolean;
+}
+
+export interface WeeklyPlan {
+  id: string;
+  weekStartDate: string;
+  days: DailyPlan[];
+  generatedAt: string;
 }
 
 export interface Template {
@@ -40,7 +88,7 @@ export interface Template {
   name: string;
   type: SessionType;
   description: string;
-  defaultExercises: string[]; // Array of exercise names
+  defaultExercises: string[];
+  // Optional detailed prescription from AI
+  detailedExercises?: ProgramExercise[];
 }
-
-export type ViewState = 'dashboard' | 'history' | 'new-session' | 'active-session' | 'session-details';

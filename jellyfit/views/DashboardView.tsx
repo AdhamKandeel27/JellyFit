@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, TrendingUp, Clock, Sparkles, ArrowRight } from 'lucide-react';
-import { Session } from '../types';
+import { Activity, TrendingUp, Clock, Sparkles, ArrowRight, Calendar, CheckCircle, MessageSquare, LogOut } from 'lucide-react';
+import { Session, UserProfile, WeeklyPlan, DailyPlan } from '../types';
 import { MOCK_HISTORY_DATA } from '../constants';
 import { getTrainingInsights } from '../services/geminiService';
 import { Button } from '../components/Button';
@@ -10,12 +10,22 @@ import { Button } from '../components/Button';
 interface DashboardViewProps {
   sessions: Session[];
   onCreateSession: () => void;
-  userSport: string | null;
+  onStartPlanSession: (day: DailyPlan) => void;
+  onOpenChat: () => void;
+  onEditProfile: () => void;
+  onLogout: () => void;
+  profile: UserProfile | null;
+  weeklyPlan: WeeklyPlan | null;
+  onGeneratePlan: () => void;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreateSession, userSport }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({ 
+  sessions, onCreateSession, onStartPlanSession, onOpenChat, onEditProfile, onLogout,
+  profile, weeklyPlan, onGeneratePlan 
+}) => {
   const [insights, setInsights] = useState<string | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   const totalSessions = sessions.length;
   const totalMinutes = sessions.reduce((acc, s) => acc + s.durationMinutes, 0);
@@ -36,20 +46,101 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
     }
   };
 
+  const handleGeneratePlan = async () => {
+    setGeneratingPlan(true);
+    await onGeneratePlan();
+    setGeneratingPlan(false);
+  };
+
   return (
     <div className="pb-24 space-y-8 animate-in fade-in duration-500">
       {/* Elegant Header */}
-      <div className="px-6 pt-8 pb-2 flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-bold text-navy-900 font-serif tracking-tight">JellyFit</h1>
-          <p className="text-slate-500 font-medium mt-1">
-            {userSport ? `${userSport} Training` : 'Elevate your performance.'}
+      <div className="px-6 pt-8 pb-2 flex justify-between items-start">
+        <div onClick={onEditProfile} className="cursor-pointer">
+          <h1 className="text-3xl font-bold text-navy-900 font-serif tracking-tight">
+            Hello, {profile?.name.split(' ')[0] || 'Athlete'}
+          </h1>
+          <p className="text-slate-500 font-medium text-sm mt-1">
+            {profile?.sport ? `${profile.sport} Training` : 'Ready to train?'}
           </p>
         </div>
-        <div className="bg-gold-100 text-gold-700 border border-gold-200 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">
-          Premium
+        <div className="flex gap-3">
+            <button 
+            onClick={onLogout}
+            className="bg-white text-slate-400 border border-slate-200 p-2.5 rounded-full shadow-sm hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all"
+            title="Sign Out"
+            >
+            <LogOut size={20} />
+            </button>
+            <button 
+            onClick={onOpenChat}
+            className="bg-navy-50 text-navy-900 border border-navy-100 p-2.5 rounded-full shadow-sm hover:bg-navy-100 transition-all relative"
+            >
+            <MessageSquare size={20} />
+            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+            </button>
         </div>
       </div>
+
+      {/* Weekly Plan Widget */}
+      {profile?.aiCoaching && (
+        <div className="px-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-navy-900 flex items-center gap-2 font-serif text-lg">
+              <Calendar size={18} className="text-navy-500" /> This Week
+            </h3>
+            {!weeklyPlan && (
+               <button 
+                 onClick={handleGeneratePlan}
+                 disabled={generatingPlan}
+                 className="text-xs font-bold text-gold-600 uppercase tracking-widest hover:text-gold-700 disabled:opacity-50"
+               >
+                 {generatingPlan ? 'Designing...' : 'Create Plan'}
+               </button>
+            )}
+          </div>
+          
+          {weeklyPlan ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+               <div className="flex overflow-x-auto no-scrollbar p-4 gap-3">
+                  {weeklyPlan.days.map((day, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`flex-shrink-0 w-32 p-3 rounded-xl border flex flex-col gap-2 relative ${day.completed ? 'bg-green-50 border-green-100' : (day.isRestDay ? 'bg-slate-50 border-slate-100 opacity-70' : 'bg-white border-slate-200')}`}
+                    >
+                       <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{day.day}</div>
+                       <div className={`font-serif font-bold text-sm leading-tight ${day.completed ? 'text-green-800' : 'text-navy-900'}`}>
+                         {day.isRestDay ? 'Rest & Recover' : day.focus}
+                       </div>
+                       
+                       {day.completed ? (
+                         <div className="mt-auto flex items-center text-xs font-bold text-green-600">
+                           <CheckCircle size={14} className="mr-1" /> Done
+                         </div>
+                       ) : !day.isRestDay ? (
+                         <button 
+                           onClick={() => onStartPlanSession(day)}
+                           className="mt-auto w-full bg-navy-900 text-white text-[10px] font-bold py-1.5 rounded-lg hover:bg-navy-800"
+                         >
+                           Start
+                         </button>
+                       ) : (
+                         <div className="mt-auto text-[10px] text-slate-400 font-medium">Active Recovery</div>
+                       )}
+                    </div>
+                  ))}
+               </div>
+            </div>
+          ) : (
+             <div className="bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-6 text-center">
+                <p className="text-slate-500 text-sm mb-3">No plan active for this week.</p>
+                <Button variant="secondary" size="sm" onClick={handleGeneratePlan} disabled={generatingPlan}>
+                  {generatingPlan ? 'AI is Thinking...' : 'Generate AI Plan'}
+                </Button>
+             </div>
+          )}
+        </div>
+      )}
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 gap-4 px-6">
@@ -74,14 +165,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
         </div>
       </div>
 
-      {/* Main Action */}
+      {/* Main Action (Manual Start) */}
       <div className="px-6">
         <Button 
             onClick={onCreateSession} 
             size="lg" 
             className="w-full shadow-lg shadow-navy-900/20 bg-navy-900 border border-navy-800 flex justify-between items-center group hover:bg-navy-800"
         >
-          <span>Start Training</span>
+          <span>Free Training Session</span>
           <span className="bg-white/20 rounded-full p-1 group-hover:bg-white/30 transition-colors">
              <ArrowRight size={16} />
           </span>
@@ -96,7 +187,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ sessions, onCreate
           </div>
           <div className="flex justify-between items-center mb-4 relative z-10">
             <h3 className="font-bold text-navy-900 flex items-center gap-2 font-serif text-lg">
-              <Sparkles size={18} className="text-gold-500" /> AI Coach Insights
+              <Sparkles size={18} className="text-gold-500" /> Coach Insights
             </h3>
             {!insights && (
               <button 

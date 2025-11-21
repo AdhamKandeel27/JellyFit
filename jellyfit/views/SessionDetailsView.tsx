@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowLeft, Calendar, Clock, Dumbbell, Video } from 'lucide-react';
 import { Session } from '../types';

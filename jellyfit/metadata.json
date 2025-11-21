@@ -1,6 +1,6 @@
 {
   "name": "JellyFit",
-  "description": "A premium fitness tracker for discerning athletes.",
+  "description": "A modern, mobile-first workout tracking application designed for padel athletes.",
   "requestFramePermissions": [
     "camera",
     "microphone"
